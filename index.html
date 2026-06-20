@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Restaurante - Página Inicial</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Dom Sabor</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/criar_pedido.php">Criar Pedido</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/adicionar_itens.php">Adicionar Itens</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/visualizar_pedidos.php">Ver Pedidos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/dashboard.php">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/clientes.php">Clientes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/cadastro_garcom.php">Cadastrar Garçom</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/cardapio.php">Cardápio</a>
+                    </li>
+                    <li class="nav-item ms-3">
+                        <a class="btn btn-outline-light btn-sm" href="pages/logout.php">Sair</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="container">
+            <h1 class="display-4">Bem-vindo ao Restaurante Dom Sabor</h1>
+            <p class="lead">Gerencie pedidos, itens e muito mais de forma eficiente e intuitiva.</p>
+        </div>
+    </div>
+
+    <div class="container my-5">
+        <div class="row g-4">
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Criar Pedido</h5>
+                        <p class="card-text">Inicie um novo pedido selecionando cliente e mesa.</p>
+                        <a href="pages/criar_pedido.php" class="btn btn-primary">Criar Pedido</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Adicionar Itens</h5>
+                        <p class="card-text">Adicione produtos ao pedido existente.</p>
+                        <a href="pages/adicionar_itens.php" class="btn btn-primary">Adicionar Itens</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Visualizar Pedidos</h5>
+                        <p class="card-text">Veja todos os pedidos ativos e finalize-os.</p>
+                        <a href="pages/visualizar_pedidos.php" class="btn btn-primary">Ver Pedidos</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Dashboard</h5>
+                        <p class="card-text">Monitore pedidos, clientes e o faturamento do sistema.</p>
+                        <a href="pages/dashboard.php" class="btn btn-primary">Dashboard</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Clientes</h5>
+                        <p class="card-text">
+                            Gerencie os clientes cadastrados.
+                        </p>
+                        <a href="pages/clientes.php" class="btn btn-primary">
+                            Clientes
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Cadastro Garçom</h5>
+                        <p class="card-text">
+                            Cadastre novos garçons para o sistema.
+                        </p>
+                        <a href="pages/cadastro_garcom.php" class="btn btn-primary">
+                            Cadastro Garçom
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Cardápio</h5>
+                        <p class="card-text">
+                            Navegue pelo cardápio e veja os pratos disponíveis.
+                        </p>
+                        <a href="pages/cardapio.php" class="btn btn-primary">
+                            Cardápio
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2026 Sistema de Restaurante. Todos os direitos reservados</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
