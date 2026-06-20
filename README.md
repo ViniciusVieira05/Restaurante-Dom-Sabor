@@ -4,7 +4,7 @@
 
 Sistema desenvolvido em **PHP + MySQL** para gerenciamento completo de restaurantes, permitindo o controle de pedidos, mesas, garçons, clientes, cardápio, despesas e relatórios administrativos.
 
-Projeto desenvolvido por **Vinicius Vieira Romão** como projeto acadêmico do curso de **Análise e Desenvolvimento de Sistemas**.
+Projeto desenvolvido como projeto acadêmico do curso de **Análise e Desenvolvimento de Sistemas**.
 
 </p>
 
