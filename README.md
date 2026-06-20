@@ -133,15 +133,9 @@ Restaurante/
 │
 ├── css/
 │   └── style.css
-│
-├── database/
-│   └── restaurante.sql
-│
-├── images/
-│   ├── logo.png
-│   └── screenshots/
-│
+|
 ├── includes/
+│   ├── admin.php
 │   ├── auth.php
 │   ├── config.php
 │   ├── footer.php
@@ -151,26 +145,23 @@ Restaurante/
 │   └── script.js
 │
 ├── pages/
+│   ├── adicionar_itens.php
 │   ├── cadastro_garcom.php
+│   ├── cardapio.php
 │   ├── clientes.php
-│   ├── criar_pedido.php
+│   ├── criar_pedidos.php
 │   ├── dashboard.php
 │   ├── despesas.php
-│   ├── editar_garcom.php
+│   ├── editaar_garcom.php
 │   ├── login.php
 │   ├── logout.php
 │   ├── relatorio_vendas.php
-│   ├── visualizar_pedidos.php
-│   └── cardapio.php
+│   └── visualizar_pedidos.php
 │
 ├── php/
-│   ├── Pedido.php
-│   ├── Cliente.php
-│   └── Produto.php
+│   └── Pedido.php
 │
-├── uploads/
-│
-├── index.php
+├── index.html
 │
 └── README.md
 ```
@@ -253,32 +244,6 @@ Abra o **XAMPP Control Panel** e inicie:
 
 - Apache
 - MySQL
-
----
-
-## 4) Crie o banco
-
-Abra o **phpMyAdmin**
-
-```
-http://localhost/phpmyadmin
-```
-
-Crie um banco chamado:
-
-```
-restaurante
-```
-
----
-
-## 5) Importe o banco
-
-Importe o arquivo:
-
-```
-database/restaurante.sql
-```
 
 ---
 
