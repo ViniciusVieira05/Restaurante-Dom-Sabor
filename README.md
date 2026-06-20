@@ -1,0 +1,369 @@
+# Dom Sabor - Sistema de Gerenciamento para Restaurantes
+
+<p align="center">
+
+Sistema desenvolvido em **PHP + MySQL** para gerenciamento completo de restaurantes, permitindo o controle de pedidos, mesas, garçons, clientes, cardápio, despesas e relatórios administrativos.
+
+Projeto desenvolvido por **Vinicius Vieira Romão** como projeto acadêmico do curso de **Análise e Desenvolvimento de Sistemas**.
+
+</p>
+
+---
+
+# Demonstração
+
+> Adicione aqui algumas imagens do sistema.
+
+Exemplo:
+
+```
+/images/dashboard.png
+/images/login.png
+/images/pedidos.png
+```
+
+---
+
+# Funcionalidades
+
+## Login
+
+- Login de usuários
+- Controle de acesso por perfil
+- Administrador
+- Garçom
+
+---
+
+## Administração
+
+- Dashboard
+- Cadastro de clientes
+- Cadastro de garçons
+- Cadastro de produtos
+- Cadastro de despesas
+- Relatórios
+- Controle de estoque
+
+---
+
+## Pedidos
+
+- Criar pedido
+- Selecionar mesa
+- Selecionar cliente
+- Selecionar garçom
+- Adicionar produtos
+- Finalizar pedido
+- Cancelar pedido
+
+---
+
+## Mesas
+
+- Controle automático de ocupação
+- Liberação automática após finalizar pedido
+- Status:
+  - Livre
+  - Ocupada
+
+---
+
+## Cardápio
+
+- Cadastro de pratos
+- Cadastro de bebidas
+- Cadastro de sobremesas
+- Controle de disponibilidade
+
+---
+
+## Clientes
+
+- Cadastro
+- Consulta
+- Exclusão
+
+---
+
+## Garçons
+
+Cada garçom possui:
+
+- Nome
+- CPF
+- Telefone
+- Salário
+- Data de admissão
+- Status
+
+Além disso, cada garçom possui um usuário de acesso ao sistema.
+
+---
+
+## Dashboard
+
+O sistema apresenta indicadores em tempo real:
+
+- Total de pedidos
+- Pedidos abertos
+- Pedidos finalizados
+- Pedidos cancelados
+- Clientes cadastrados
+- Produtos cadastrados
+- Mesas ocupadas
+- Faturamento bruto
+- Total de despesas
+- Faturamento líquido
+- Faturamento do dia
+- Ranking de garçons
+
+---
+
+## Relatórios
+
+- Relatório de vendas
+- Total vendido
+- Vendas por período
+- Vendas por garçom
+
+---
+
+# 🛠 Tecnologias utilizadas
+
+- PHP
+- MySQL
+- HTML5
+- CSS3
+- Bootstrap 5
+- JavaScript
+- XAMPP
+
+---
+
+# Estrutura do projeto
+
+```
+Restaurante/
+│
+├── css/
+│   └── style.css
+│
+├── database/
+│   └── restaurante.sql
+│
+├── images/
+│   ├── logo.png
+│   └── screenshots/
+│
+├── includes/
+│   ├── auth.php
+│   ├── config.php
+│   ├── footer.php
+│   └── header.php
+│
+├── js/
+│   └── script.js
+│
+├── pages/
+│   ├── cadastro_garcom.php
+│   ├── clientes.php
+│   ├── criar_pedido.php
+│   ├── dashboard.php
+│   ├── despesas.php
+│   ├── editar_garcom.php
+│   ├── login.php
+│   ├── logout.php
+│   ├── relatorio_vendas.php
+│   ├── visualizar_pedidos.php
+│   └── cardapio.php
+│
+├── php/
+│   ├── Pedido.php
+│   ├── Cliente.php
+│   └── Produto.php
+│
+├── uploads/
+│
+├── index.php
+│
+└── README.md
+```
+
+---
+
+# Banco de Dados
+
+O sistema utiliza **MySQL**.
+
+Principais tabelas:
+
+- usuarios
+- garcons
+- clientes
+- produtos
+- pedidos
+- itens_pedido
+- mesas
+- despesas
+
+---
+
+# Controle de usuários
+
+## Administrador
+
+Pode:
+
+- cadastrar garçons
+- cadastrar produtos
+- cadastrar clientes
+- visualizar dashboard
+- gerar relatórios
+- cadastrar despesas
+- controlar pedidos
+
+---
+
+## Garçom
+
+Pode:
+
+- criar pedidos
+- adicionar itens
+- finalizar pedidos
+- visualizar pedidos
+
+---
+
+#  Como executar o projeto
+
+## 1) Clone o repositório
+
+```bash
+git clone https://github.com/SEU-USUARIO/dom-sabor.git
+```
+
+---
+
+## 2) Coloque o projeto dentro do XAMPP
+
+Copie a pasta para:
+
+```
+C:\xampp\htdocs\
+```
+
+Exemplo:
+
+```
+C:\xampp\htdocs\Restaurante
+```
+
+---
+
+## 3) Inicie o Apache e o MySQL
+
+Abra o **XAMPP Control Panel** e inicie:
+
+- Apache
+- MySQL
+
+---
+
+## 4) Crie o banco
+
+Abra o **phpMyAdmin**
+
+```
+http://localhost/phpmyadmin
+```
+
+Crie um banco chamado:
+
+```
+restaurante
+```
+
+---
+
+## 5) Importe o banco
+
+Importe o arquivo:
+
+```
+database/restaurante.sql
+```
+
+---
+
+## 6) Configure a conexão
+
+Abra:
+
+```
+includes/config.php
+```
+
+Configure:
+
+```php
+$host = "localhost";
+$db = "restaurante";
+$user = "root";
+$pass = "";
+```
+
+---
+
+## 7) Execute
+
+Abra no navegador:
+
+```
+http://localhost/Restaurante
+```
+
+---
+
+# Conceitos aplicados
+
+- CRUD
+- Programação Orientada a Objetos
+- Sessões
+- Autenticação
+- Controle de acesso
+- Relacionamentos no banco
+- Chaves primárias
+- Chaves estrangeiras
+- Prepared Statements
+- Bootstrap
+- Responsividade
+- Arquitetura modular
+
+---
+
+# Melhorias futuras
+
+- Upload de imagens dos pratos
+- Impressão de comandas
+- Controle financeiro completo
+- Delivery
+- Reserva de mesas
+- QR Code para cardápio
+- Gráficos estatísticos
+- API REST
+- Aplicativo mobile
+
+---
+
+# Autor
+
+**Vinicius Vieira Romão**
+
+Graduando em **Análise e Desenvolvimento de Sistemas**
+
+Instituto Federal do Piauí (IFPI)
+---
+
+Este projeto foi desenvolvido para fins acadêmicos e de aprendizado.
