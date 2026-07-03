@@ -11,8 +11,17 @@ $data_inicio = $_GET['data_inicio'] ?? '';
 $data_fim = $_GET['data_fim'] ?? '';
 $garcom_id = $_GET['garcom_id'] ?? '';
 
-$garcons = $pdo->query("SELECT id, nome FROM usuarios WHERE perfil = 'garcom' ORDER BY nome")->fetchAll();
-
+$garcons = $pdo->query("
+    SELECT
+        f.id,
+        f.nome
+    FROM funcionarios f
+    INNER JOIN usuarios u
+        ON u.id = f.usuario_id
+    WHERE u.perfil = 'garcom'
+    AND f.status = 'ativo'
+    ORDER BY f.nome
+    ")->fetchAll();
 $where = ["p.status = 'finalizado'"];
 $params = [];
 
@@ -47,15 +56,16 @@ $total_vendas->execute($params);
 $total_vendas = $total_vendas->fetch()['total'] ?? 0;
 
 $pedidos = $pdo->prepare(
-    "SELECT
+    "SELECT 
          p.id,
          c.nome as cliente,
-         u.nome as garcom,
+        f.nome as garcom,
          p.data_pedido,
          SUM(ip.quantidade * ip.preco_unitario) as total
      FROM pedidos p
      LEFT JOIN clientes c ON c.id = p.cliente_id
-     LEFT JOIN usuarios u ON u.id = p.garcom_id
+     LEFT JOIN funcionarios f
+    ON f.id = p.garcom_id
      INNER JOIN itens_pedido ip ON ip.pedido_id = p.id
      $where_sql
      GROUP BY p.id
