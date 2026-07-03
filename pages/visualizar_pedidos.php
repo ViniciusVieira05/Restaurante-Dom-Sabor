@@ -78,7 +78,17 @@ if (isset($_GET['cancelar'])) {
 
 $filtro = $_GET['filtro'] ?? 'todos';
 $mesa_id = $_GET['mesa_id'] ?? '';
-$garcom_filter = $_GET['garcom_id'] ?? '';
+$garcons = $pdo->query("
+    SELECT
+        f.id,
+        f.nome
+    FROM funcionarios f
+    INNER JOIN usuarios u
+        ON u.id = f.usuario_id
+    WHERE u.perfil = 'garcom'
+    AND f.status = 'ativo'
+    ORDER BY f.nome
+    ")->fetchAll();
 $pedido_id = $_GET['pedido_id'] ?? null;
 
 $mesas = $pdo->query("SELECT id, numero FROM mesas ORDER BY numero")->fetchAll();
@@ -94,7 +104,11 @@ if ($pedido_id) {
     $sql = "SELECT p.*, c.nome as cliente_nome, m.numero as mesa_numero, u.nome as garcom_nome FROM pedidos p 
                            LEFT JOIN clientes c ON p.cliente_id = c.id 
                            LEFT JOIN mesas m ON p.mesa_id = m.id 
-                           LEFT JOIN usuarios u ON p.garcom_id = u.id
+                           LEFT JOIN funcionarios f
+                                ON p.garcom_id = f.id
+
+                            LEFT JOIN usuarios u
+                                ON f.usuario_id = u.id
                            WHERE p.id = ?";
     $detailParameters = [$pedido_id];
 
@@ -115,10 +129,20 @@ if ($pedido_id) {
 }
 
 // Obter lista de pedidos conforme filtro
-$query = "SELECT p.*, c.nome as cliente_nome, m.numero as mesa_numero, u.nome as garcom_nome FROM pedidos p 
-          LEFT JOIN clientes c ON p.cliente_id = c.id 
-          LEFT JOIN mesas m ON p.mesa_id = m.id
-          LEFT JOIN usuarios u ON p.garcom_id = u.id";
+$query = "
+    SELECT
+        p.*,
+        c.nome AS cliente_nome,
+        m.numero AS mesa_numero,
+        f.nome AS garcom_nome
+    FROM pedidos p
+    LEFT JOIN clientes c
+        ON p.cliente_id = c.id
+    LEFT JOIN mesas m
+        ON p.mesa_id = m.id
+    LEFT JOIN funcionarios f
+        ON p.garcom_id = f.id
+    ";
 
 if ($filtro === 'abertos') {
     $conditions[] = "p.status = 'aberto'";
@@ -131,14 +155,36 @@ if (!empty($mesa_id)) {
     $parameters[] = $mesa_id;
 }
 
-if (!isGarcom() && !empty($garcom_filter)) {
-    $conditions[] = "p.garcom_id = ?";
-    $parameters[] = $garcom_filter;
+if (isGarcom()) {
+
+    $stmtFunc = $pdo->prepare("
+        SELECT id
+        FROM funcionarios
+        WHERE usuario_id = ?
+    ");
+
+    $stmtFunc->execute([$_SESSION['id']]);
+
+    $funcionario = $stmtFunc->fetch();
+
+    $sql .= " AND p.garcom_id = ?";
+    $detailParameters[] = $funcionario['id'];
 }
 
 if (isGarcom()) {
+
+    $stmt = $pdo->prepare("
+        SELECT id
+        FROM funcionarios
+        WHERE usuario_id = ?
+    ");
+
+    $stmt->execute([$_SESSION['id']]);
+
+    $funcionario = $stmt->fetch();
+
     $conditions[] = "p.garcom_id = ?";
-    $parameters[] = $_SESSION['id'];
+    $parameters[] = $funcionario['id'];
 }
 
 if (!empty($conditions)) {

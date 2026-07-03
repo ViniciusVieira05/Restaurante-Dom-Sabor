@@ -15,7 +15,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $cliente_id = $_POST['cliente_id'] ?? '';
         $mesa_id = $_POST['mesa_id'] ?? '';
-        $garcom_id = isGarcom() ? $_SESSION['id'] : ($_POST['garcom_id'] ?? null);
+        if (isGarcom()) {
+
+            $stmt = $pdo->prepare("
+                SELECT id
+                FROM funcionarios
+                WHERE usuario_id = ?
+            ");
+
+            $stmt->execute([$_SESSION['id']]);
+
+            $funcionario = $stmt->fetch();
+
+            if (!$funcionario) {
+                throw new Exception("Funcionário não encontrado.");
+            }
+
+            $garcom_id = $funcionario['id'];
+
+        } else {
+
+            $garcom_id = $_POST['garcom_id'] ?? null;
+
+        }
 
         try {
             if (empty($cliente_id) || !is_numeric($cliente_id)) {
@@ -101,7 +123,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Obter listas para selects
     $clientes = $pdo->query("SELECT * FROM clientes")->fetchAll();
     $mesas = $pdo->query("SELECT * FROM mesas WHERE status = 'livre'")->fetchAll();
-    $garcons = $pdo->query("SELECT * FROM usuarios WHERE perfil = 'garcom' ")->fetchAll();
+    $garcons = $pdo->query("
+        SELECT
+        f.id,
+        f.nome
+        FROM funcionarios f
+        INNER JOIN usuarios u
+        ON u.id = f.usuario_id
+        WHERE f.cargo = 'garcom'
+        AND f.status = 'ativo'
+        ORDER BY f.nome
+        ")->fetchAll();
     $produtos = $pdo->query("SELECT * FROM produtos")->fetchAll();
     ?>
     <!DOCTYPE html>
