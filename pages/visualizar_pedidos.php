@@ -78,6 +78,7 @@ if (isset($_GET['cancelar'])) {
 
 $filtro = $_GET['filtro'] ?? 'todos';
 $mesa_id = $_GET['mesa_id'] ?? '';
+$garcom_filter = $_GET['garcom_id'] ?? '';
 $garcons = $pdo->query("
     SELECT
         f.id,
@@ -92,7 +93,6 @@ $garcons = $pdo->query("
 $pedido_id = $_GET['pedido_id'] ?? null;
 
 $mesas = $pdo->query("SELECT id, numero FROM mesas ORDER BY numero")->fetchAll();
-$garcons = $pdo->query("SELECT id, nome FROM usuarios WHERE perfil = 'garcom' ORDER BY nome")->fetchAll();
 
 // Obter pedido específico se informado
 $pedido_detalhes = null;
@@ -155,21 +155,11 @@ if (!empty($mesa_id)) {
     $parameters[] = $mesa_id;
 }
 
-if (isGarcom()) {
-
-    $stmtFunc = $pdo->prepare("
-        SELECT id
-        FROM funcionarios
-        WHERE usuario_id = ?
-    ");
-
-    $stmtFunc->execute([$_SESSION['id']]);
-
-    $funcionario = $stmtFunc->fetch();
-
-    $sql .= " AND p.garcom_id = ?";
-    $detailParameters[] = $funcionario['id'];
+if (!isGarcom() && !empty($garcom_filter)) {
+    $conditions[] = "p.garcom_id = ?";
+    $parameters[] = $garcom_filter;
 }
+
 
 if (isGarcom()) {
 

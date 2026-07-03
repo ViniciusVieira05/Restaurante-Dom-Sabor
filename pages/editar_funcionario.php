@@ -260,7 +260,7 @@ if (isset($_POST['salvar'])) {
 
                         </button>
 
-                        <a href="cadastro_funcionario.php" class="btn btn-secondary">
+                        <a href="funcionarios.php" class="btn btn-secondary">
 
                             Voltar
 

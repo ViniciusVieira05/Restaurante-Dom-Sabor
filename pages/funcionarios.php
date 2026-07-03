@@ -1,182 +1,172 @@
-<?php
-
-require_once '../includes/config.php';
+<?php require_once '../includes/config.php';
 require_once '../includes/auth.php';
 
 if ($_SESSION['perfil'] != 'admin') {
-    die('Acesso negado.');
+    die("Acesso negado.");
+}
+$mensagem = '';
+$erro = '';
+if (isset($_POST['cadastrar'])) {
+    $nome = trim($_POST['nome']);
+    $usuario = trim($_POST['usuario']);
+    $senha = md5($_POST['senha']);
+    $cpf = trim($_POST['cpf']);
+    $telefone = trim($_POST['telefone']);
+    $cargo = trim($_POST['cargo']);
+    $salario = $_POST['salario'];
+    $data_admissao = $_POST['data_admissao'];
+    try {
+        if (!preg_match('/^\d{3}\.\d{3}\.\d{3}-\d{2}$/', $cpf)) {
+            throw new Exception("CPF deve ser no formato XXX.XXX.XXX-XX.");
+        }
+        if (!preg_match('/^\(\d{2}\) \d{5}-\d{4}$/', $telefone)) {
+            throw new Exception("Telefone deve ser no formato (XX) XXXXX-XXXX.");
+        }
+        $verifica = $pdo->prepare(" SELECT id FROM usuarios WHERE usuario = ? ");
+        $verifica->execute([$usuario]);
+        $stmt = $pdo->prepare(" SELECT id FROM funcionarios WHERE cpf = ? ");
+        $stmt->execute([$cpf]);
+        $cpfNumeros = preg_replace('/\D/', '', $cpf);
+        if (strlen($cpfNumeros) != 11) {
+            throw new Exception("CPF deve ser no formato XXX.XXX.XXX-XX.");
+        }
+        $telefoneNumeros = preg_replace('/\D/', '', $telefone);
+        if (strlen($telefoneNumeros) != 10 && strlen($telefoneNumeros) != 11) {
+            throw new Exception("Telefone deve ser no formato (XX) XXXXX-XXXX.");
+        }
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare(" INSERT INTO usuarios (nome, usuario, senha, perfil) VALUES (?, ?, ?, 'garcom') ");
+        $stmt->execute([$nome, $usuario, $senha]);
+        $usuario_id = $pdo->lastInsertId();
+        $stmt = $pdo->prepare(" INSERT INTO funcionarios ( usuario_id, nome, cpf, telefone, cargo, salario, data_admissao ) VALUES ( ?,?,?,?,?,?,? ) ");
+        $stmt->execute([$usuario_id, $nome, $cpf, $telefone, $cargo, $salario, $data_admissao]);
+        $pdo->commit();
+        $mensagem = "Funcionário cadastrado com sucesso!";
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        $erro = $e->getMessage();
+    }
 }
 
-$data_inicio = $_GET['data_inicio'] ?? '';
-$data_fim = $_GET['data_fim'] ?? '';
-$garcom_id = $_GET['garcom_id'] ?? '';
 
-$garcons = $pdo->query("
-    SELECT
-        f.id,
-        f.nome
-    FROM funcionarios f
-    INNER JOIN usuarios u
-        ON u.id = f.usuario_id
-    WHERE u.perfil = 'garcom'
-    AND f.status = 'ativo'
-    ORDER BY f.nome
-    ")->fetchAll();
-$where = ["p.status = 'finalizado'"];
-$params = [];
-
-if (!empty($data_inicio)) {
-    $where[] = 'DATE(p.data_pedido) >= ?';
-    $params[] = $data_inicio;
-}
-
-if (!empty($data_fim)) {
-    $where[] = 'DATE(p.data_pedido) <= ?';
-    $params[] = $data_fim;
-}
-
-if (!empty($garcom_id)) {
-    $where[] = 'p.garcom_id = ?';
-    $params[] = $garcom_id;
-}
-
-$where_sql = '';
-if (!empty($where)) {
-    $where_sql = 'WHERE ' . implode(' AND ', $where);
-}
-
-$total_vendas = $pdo->prepare(
-    "SELECT SUM(ip.quantidade * ip.preco_unitario) as total
-     FROM pedidos p
-     INNER JOIN itens_pedido ip ON ip.pedido_id = p.id
-     $where_sql"
-);
-
-$total_vendas->execute($params);
-$total_vendas = $total_vendas->fetch()['total'] ?? 0;
-
-$pedidos = $pdo->prepare(
-    "SELECT 
-         p.id,
-         c.nome as cliente,
-        f.nome as garcom,
-         p.data_pedido,
-         SUM(ip.quantidade * ip.preco_unitario) as total
-     FROM pedidos p
-     LEFT JOIN clientes c ON c.id = p.cliente_id
-     LEFT JOIN funcionarios f
-    ON f.id = p.garcom_id
-     INNER JOIN itens_pedido ip ON ip.pedido_id = p.id
-     $where_sql
-     GROUP BY p.id
-     ORDER BY p.data_pedido DESC"
-);
-
-$pedidos->execute($params);
-$pedidos = $pedidos->fetchAll();
-
-?>
-
+if (isset($_GET['excluir'])) {
+    if ($_SESSION['perfil'] != 'admin') {
+        die("Acesso negado.");
+    }
+    try {
+        $id = intval($_GET['excluir']);
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM pedidos WHERE garcom_id = ?");
+        $stmt->execute([$id]);
+        $pedidosCount = $stmt->fetchColumn();
+        if ($pedidosCount > 0) {
+            throw new Exception("Não é possível excluir este funcionário porque ele possui pedidos registrados.");
+        }
+        $stmt = $pdo->prepare("DELETE FROM usuarios WHERE id = ? AND perfil = 'garcom'");
+        $stmt->execute([$id]);
+        $mensagem = "Funcionário excluído com sucesso!";
+    } catch (Exception $e) {
+        $erro = $e->getMessage() ?: "Não foi possível excluir este funcionário.";
+    }
+} ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório de Vendas</title>
+    <title>Cadastro de Funcionários</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
 </head>
-<body>
 
-<?php include '../includes/header.php'; ?>
-
-<div class="container my-5">
-    <h1>Relatório de Vendas</h1>
-
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label">Data Início</label>
-                    <input type="date" name="data_inicio" class="form-control" value="<?php echo htmlspecialchars($data_inicio); ?>">
+<body> <?php include '../includes/header.php'; ?>
+    <div class="container mt-5">
+        <div class="card shadow p-4">
+            <h2 class="mb-4"> Cadastro de Funcionários </h2> <?php if ($mensagem): ?>
+                <div class="alert alert-success"> <?php echo $mensagem; ?> </div> <?php endif; ?> <?php if ($erro): ?>
+                <div class="alert alert-danger"> <?php echo $erro; ?> </div> <?php endif; ?>
+            <form method="POST">
+                <div class="mb-3"> <label class="form-label"> Nome </label> <input type="text" name="nome"
+                        class="form-control" required>
+                    <div class="mb-3"> <label>CPF</label> <input type="text" id="cpf" name="cpf" class="form-control"
+                            maxlength="14" required> </div>
+                    <div class="mb-3"> <label>Telefone</label> <input type="text" id="telefone" name="telefone"
+                            class="form-control" maxlength="15" required> </div>
+                    <div class="mb-3"> <label>Cargo</label> <select name="cargo" class="form-select" required>
+                            <option value="garcom">Garçom</option>
+                            <option value="caixa">Caixa</option>
+                            <option value="cozinheiro">Cozinheiro</option>
+                            <option value="gerente">Gerente</option>
+                        </select> </div>
+                    <div class="mb-3"> <label>Salário</label> <input type="number" step="0.01" name="salario"
+                            class="form-control" required> </div>
+                    <div class="mb-3"> <label>Data de Admissão</label> <input type="date" name="data_admissao"
+                            class="form-control" value="<?php echo date('Y-m-d'); ?>" required> </div>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label">Data Fim</label>
-                    <input type="date" name="data_fim" class="form-control" value="<?php echo htmlspecialchars($data_fim); ?>">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Garçom</label>
-                    <select name="garcom_id" class="form-select">
-                        <option value="">Todos</option>
-                        <?php foreach ($garcons as $g): ?>
-                            <option value="<?php echo $g['id']; ?>" <?php echo $garcom_id == $g['id'] ? 'selected' : ''; ?>><?php echo $g['nome']; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-                </div>
+                <div class="mb-3"> <label class="form-label"> Usuário </label> <input type="text" name="usuario"
+                        class="form-control" required> </div>
+                <div class="mb-3"> <label class="form-label"> Senha </label> <input type="password" name="senha"
+                        class="form-control" required> </div> <button type="submit" name="cadastrar"
+                    class="btn btn-success"> Cadastrar Funcionário </button>
             </form>
-        </div>
-    </div>
-
-    <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-body">
-                    <h5>Total do Relatório</h5>
-                    <p class="mb-0">R$ <?php echo number_format($total_vendas, 2, ',', '.'); ?></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-body">
-                    <h5>Critérios</h5>
-                    <p class="mb-0"><?php echo $data_inicio ? 'De ' . date('d/m/Y', strtotime($data_inicio)) : 'De início'; ?> até <?php echo $data_fim ? date('d/m/Y', strtotime($data_fim)) : 'hoje'; ?></p>
-                    <p><?php echo $garcom_id ? 'Garçom: ' . ($garcons[array_search($garcom_id, array_column($garcons, 'id'))]['nome'] ?? '') : 'Todos os garçons'; ?></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card shadow">
-        <div class="card-body">
-            <h4 class="mb-4">Pedidos Finalizados</h4>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+            <hr class="my-4">
+            <h3>Funcionários Cadastrados</h3>
+            <?php $funcionarios = $pdo->query(" SELECT u.id AS usuario_id, u.usuario, g.id, g.nome, g.cpf, g.telefone, g.cargo, g.salario, g.status, g.data_admissao FROM funcionarios g INNER JOIN usuarios u ON u.id = g.usuario_id ORDER BY g.nome ")->fetchAll(); ?>
+            <table class="table table-striped mt-3">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Código</th>
+                        <th>Nome</th>
+                        <th>CPF</th>
+                        <th>Telefone</th>
+                        <th>Usuário</th>
+                        <th>Salário</th>
+                        <th>Cargo</th>
+                        <th>Admissão</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody> <?php foreach ($funcionarios as $funcionario): ?>
                         <tr>
-                            <th>#</th>
-                            <th>Cliente</th>
-                            <th>Garçom</th>
-                            <th>Data</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($pedidos)): ?>
-                            <?php foreach ($pedidos as $pedido): ?>
-                                <tr>
-                                    <td>#<?php echo $pedido['id']; ?></td>
-                                    <td><?php echo $pedido['cliente']; ?></td>
-                                    <td><?php echo $pedido['garcom']; ?></td>
-                                    <td><?php echo date('d/m/Y H:i', strtotime($pedido['data_pedido'])); ?></td>
-                                    <td>R$ <?php echo number_format($pedido['total'] ?? 0, 2, ',', '.'); ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="5">Nenhum pedido encontrado.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+                            <td> FUNC-<?php echo str_pad($funcionario['id'], 3, '0', STR_PAD_LEFT); ?> </td>
+                            <td>
+                                <?php echo $funcionario['nome']; ?>
+                            </td>
+                            <td>
+                                <?php echo $funcionario['cpf']; ?>
+                            </td>
+                            <td>
+                                <?php echo $funcionario['telefone']; ?>
+                            </td>
+                            <td>
+                                <?php echo $funcionario['usuario']; ?>
+                            </td>
+                            <td> R$ 
+                                <?php echo number_format($funcionario['salario'], 2, ',', '.'); ?> 
+                            </td>
+                            <td> 
+                                <?php echo $funcionario['cargo']; ?> 
+                            </td>
+                            <td> 
+                                <?php echo date('d/m/Y', strtotime($funcionario['data_admissao'])); ?> 
+                            </td>
+                            <td> 
+                                <?php if ($funcionario['status'] == 'ativo'): ?> <span class="badge bg-success"> Ativo
+                                    </span>
+                                <?php else: ?> <span class="badge bg-danger"> Inativo </span> <?php endif; ?> </td>
+                            <td> <a href="editar_funcionario.php?id=<?php echo $funcionario['id']; ?>"
+                                    class="btn btn-warning btn-sm"> Editar </a> <a
+                                    href="?excluir=<?php echo $funcionario['usuario_id']; ?>" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Excluir este funcionário?')"> Excluir </a> </td>
+                        </tr> <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div> <?php include '../includes/footer.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script> const cpf = document.getElementById('cpf'); if (cpf) { cpf.addEventListener('input', function (e) { let valor = e.target.value.replace(/\D/g, ''); valor = valor.replace(/(\d{3})(\d)/, "$1.$2"); valor = valor.replace(/(\d{3})(\d)/, "$1.$2"); valor = valor.replace(/(\d{3})(\d{1,2})$/, "$1-$2"); e.target.value = valor; }); } const telefone = document.getElementById('telefone'); if (telefone) { telefone.addEventListener('input', function (e) { let valor = e.target.value.replace(/\D/g, ''); valor = valor.replace(/^(\d{2})(\d)/g, "($1) $2"); valor = valor.replace(/(\d)(\d{4})$/, "$1-$2"); e.target.value = valor; }); } </script>
 </body>
+
 </html>
